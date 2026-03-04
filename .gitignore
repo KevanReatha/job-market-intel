@@ -1,8 +1,20 @@
-venv/
+cat > .gitignore << 'EOF'
+# Secrets
+.env
+
+# Python
 __pycache__/
 *.pyc
-.env
-data/
+.venv/
+venv/
+.envrc
+
+# Local outputs
 *.json
-*.gz
-.aws/
+*.jsonl
+*.parquet
+
+# OS / Editor
+.DS_Store
+.vscode/
+EOF
