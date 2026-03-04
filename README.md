@@ -14,6 +14,12 @@ Analytics datasets
 
 ![Architecture](docs/architecture_v1.png)
 
+## Data Lake Structure
+
+See the detailed structure here:
+
+docs/data_lake_structure.md
+
 ## Tech stack
 
 - Python
