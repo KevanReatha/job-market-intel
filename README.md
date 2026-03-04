@@ -12,6 +12,8 @@ AWS S3 Data Lake
 ↓
 Analytics datasets
 
+![Architecture](docs/architecture_v1.png)
+
 ## Tech stack
 
 - Python
