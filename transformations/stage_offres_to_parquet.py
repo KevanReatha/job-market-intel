@@ -124,6 +124,116 @@ def clean_company(text: str | None) -> str | None:
 
     return text
 
+def get_role_family(title_clean: str | None) -> str | None:
+    if title_clean is None:
+        return None
+
+    t = title_clean.lower().strip()
+
+    # False positives first
+    if "data center" in t:
+        return "false_positive"
+
+    # Most specific roles first
+    if "analytics engineer" in t:
+        return "analytics_engineer"
+
+    if "machine learning engineer" in t or "ml engineer" in t:
+        return "ml_engineer"
+
+    if "ai engineer" in t or "ia engineer" in t:
+        return "ai_engineer"
+
+    if "llm" in t or "genai" in t or "agentique" in t:
+        return "ai_engineer"
+
+    if "data scientist" in t:
+        return "data_scientist"
+
+    if "data engineer" in t or "data ingénieur" in t or "ingenieur data" in t or "ingénieur data" in t:
+        return "data_engineer"
+
+    if "architecte data" in t or "data architect" in t:
+        return "data_architect"
+
+    if "data platform" in t or "platform" in t:
+        return "data_platform"
+
+    if "chef de projet data" in t:
+        return "data_project"
+
+    if "data gouvernance" in t or "data governance" in t:
+        return "data_governance"
+
+    if "data quality" in t or "master data" in t:
+        return "data_governance"
+
+    if "data analyst" in t or "analyste data" in t:
+        return "data_analyst"
+
+    if "business intelligence" in t or "power bi" in t or "bi " in t or "& bi" in t or "/ bi" in t:
+        return "bi_analytics"
+
+    if "head of data" in t or "data manager" in t:
+        return "data_management"
+
+    return "other"
+
+SKILL_PATTERNS = {
+    "python": [r"\bpython\b"],
+    "sql": [r"\bsql\b"],
+    "scala": [r"\bscala\b"],
+    "r": [r"\br\b"],
+
+    "spark": [r"\bspark\b"],
+    "pyspark": [r"\bpyspark\b"],
+    "kafka": [r"\bkafka\b"],
+    "hadoop": [r"\bhadoop\b"],
+
+    "dbt": [r"\bdbt\b"],
+    "airflow": [r"\bairflow\b"],
+    "databricks": [r"\bdatabricks\b"],
+    "snowflake": [r"\bsnowflake\b"],
+    "bigquery": [r"\bbigquery\b"],
+    "redshift": [r"\bredshift\b"],
+    "trino": [r"\btrino\b"],
+    "presto": [r"\bpresto\b"],
+
+    "aws": [r"\baws\b", r"\bamazon web services\b"],
+    "azure": [r"\bazure\b"],
+    "gcp": [r"\bgcp\b", r"\bgoogle cloud\b", r"\bgoogle cloud platform\b"],
+
+    "power_bi": [r"\bpower\s*bi\b"],
+    "tableau": [r"\btableau\b"],
+    "looker": [r"\blooker\b", r"\blooker studio\b"],
+
+    "pytorch": [r"\bpytorch\b"],
+    "tensorflow": [r"\btensorflow\b"],
+    "scikit_learn": [r"\bscikit-learn\b", r"\bsklearn\b"],
+    "mlflow": [r"\bmlflow\b"],
+    "langchain": [r"\blangchain\b"],
+
+    "docker": [r"\bdocker\b"],
+    "kubernetes": [r"\bkubernetes\b", r"\bk8s\b"],
+    "terraform": [r"\bterraform\b"],
+    "git": [r"\bgit\b", r"\bgithub\b", r"\bgitlab\b"],
+}
+
+
+def extract_skills(text: str | None) -> list[str]:
+    if text is None:
+        return []
+
+    t = text.lower()
+    found = []
+
+    for skill, patterns in SKILL_PATTERNS.items():
+        for pattern in patterns:
+            if re.search(pattern, t):
+                found.append(skill)
+                break
+
+    return sorted(found)
 
 def flatten_offer(o: dict) -> dict:
     lieu = o.get("lieuTravail") or {}
@@ -131,13 +241,17 @@ def flatten_offer(o: dict) -> dict:
     salaire = o.get("salaire") or {}
 
     title = o.get("intitule")
+    title_clean = clean_title(title)
+    
     company = ent.get("nom")
     description = o.get("description")
+    description_clean = clean_text_basic(description)
 
     return {
         "offer_id": o.get("id"),
         "title": title,
-        "title_clean": clean_title(title),
+        "title_clean": title_clean,
+        "role_family": get_role_family(title_clean),
         "rome_code": o.get("romeCode"),
         "rome_label": o.get("romeLibelle"),
         "created_at": o.get("dateCreation"),
@@ -149,7 +263,8 @@ def flatten_offer(o: dict) -> dict:
         "contract_label": o.get("typeContratLibelle"),
         "salary_label": salaire.get("libelle") or salaire.get("commentaire"),
         "description": description,
-        "description_clean": clean_text_basic(description),
+        "description_clean": description_clean,
+        "skills": extract_skills(description_clean),
         "source": "francetravail",
     }
 
