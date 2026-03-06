@@ -268,6 +268,27 @@ def flatten_offer(o: dict) -> dict:
         "source": "francetravail",
     }
 
+def run_quality_checks(df: pd.DataFrame, dt: str) -> None:
+    total_rows = len(df)
+
+    if total_rows == 0:
+        raise ValueError(f"[QUALITY] No rows produced for dt={dt}")
+
+    title_clean_not_null = df["title_clean"].notna() & (df["title_clean"].str.strip() != "")
+    title_clean_pct = round(100 * title_clean_not_null.sum() / total_rows, 2)
+
+    relevant_role = df["role_family"].notna() & (~df["role_family"].isin(["other", "false_positive"]))
+    relevant_role_pct = round(100 * relevant_role.sum() / total_rows, 2)
+
+    company_not_null = df["company_name_clean"].notna() & (df["company_name_clean"].astype(str).str.strip() != "")
+    company_pct = round(100 * company_not_null.sum() / total_rows, 2)
+
+    print(f"[QUALITY] dt={dt}")
+    print(f"[QUALITY] total_rows={total_rows}")
+    print(f"[QUALITY] title_clean_populated_pct={title_clean_pct}")
+    print(f"[QUALITY] relevant_role_family_pct={relevant_role_pct}")
+    print(f"[QUALITY] company_name_clean_populated_pct={company_pct}")
+    
 
 def main():
     bucket = os.getenv("S3_BUCKET", "job-market-intel-kevan")
@@ -295,6 +316,8 @@ def main():
     df = pd.DataFrame(rows)
     print("Rows:", len(df), "Cols:", len(df.columns))
 
+    run_quality_checks(df, dt)
+    
     df.to_parquet(local_parquet, index=False)
     print("Saved parquet locally:", local_parquet)
 
