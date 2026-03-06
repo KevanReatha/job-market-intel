@@ -1,0 +1,87 @@
+{
+    "python": [
+        "python"
+    ],
+    "sql": [
+        "sql"
+    ],
+    "pyspark": [
+        "pyspark"
+    ],
+    "spark": [
+        "spark"
+    ],
+    "scala": [
+        "scala"
+    ],
+    "r": [
+        "r "
+    ],
+    "airflow": [
+        "airflow"
+    ],
+    "dbt": [
+        "dbt"
+    ],
+    "kafka": [
+        "kafka"
+    ],
+    "snowflake": [
+        "snowflake"
+    ],
+    "bigquery": [
+        "bigquery"
+    ],
+    "redshift": [
+        "redshift"
+    ],
+    "databricks": [
+        "databricks"
+    ],
+    "aws": [
+        "aws"
+    ],
+    "azure": [
+        "azure"
+    ],
+    "gcp": [
+        "gcp"
+    ],
+    "terraform": [
+        "terraform"
+    ],
+    "docker": [
+        "docker"
+    ],
+    "kubernetes": [
+        "kubernetes"
+    ],
+    "git": [
+        "git"
+    ],
+    "tableau": [
+        "tableau"
+    ],
+    "power_bi": [
+        "power bi",
+        "powerbi"
+    ],
+    "looker": [
+        "looker"
+    ],
+    "tensorflow": [
+        "tensorflow"
+    ],
+    "pytorch": [
+        "pytorch"
+    ],
+    "scikit_learn": [
+        "scikit-learn"
+    ],
+    "langchain": [
+        "langchain"
+    ],
+    "mlflow": [
+        "mlflow"
+    ]
+}
