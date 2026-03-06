@@ -1,87 +1,95 @@
 {
     "python": [
-        "python"
+        "\\bpython\\b"
     ],
     "sql": [
-        "sql"
+        "\\bsql\\b"
     ],
     "pyspark": [
-        "pyspark"
+        "\\bpyspark\\b"
     ],
     "spark": [
-        "spark"
+        "\\bspark\\b"
     ],
     "scala": [
-        "scala"
+        "\\bscala\\b"
     ],
     "r": [
-        "r "
+        "\\br\\b"
     ],
     "airflow": [
-        "airflow"
+        "\\bairflow\\b"
     ],
     "dbt": [
-        "dbt"
+        "\\bdbt\\b"
     ],
     "kafka": [
-        "kafka"
+        "\\bkafka\\b"
     ],
     "snowflake": [
-        "snowflake"
+        "\\bsnowflake\\b"
     ],
     "bigquery": [
-        "bigquery"
+        "\\bbigquery\\b"
     ],
     "redshift": [
-        "redshift"
+        "\\bredshift\\b"
     ],
     "databricks": [
-        "databricks"
+        "\\bdatabricks\\b"
     ],
     "aws": [
-        "aws"
+        "\\baws\\b",
+        "\\bamazon web services\\b"
     ],
     "azure": [
-        "azure"
+        "\\bazure\\b"
     ],
     "gcp": [
-        "gcp"
+        "\\bgcp\\b",
+        "\\bgoogle cloud\\b",
+        "\\bgoogle cloud platform\\b"
     ],
     "terraform": [
-        "terraform"
+        "\\bterraform\\b"
     ],
     "docker": [
-        "docker"
+        "\\bdocker\\b"
     ],
     "kubernetes": [
-        "kubernetes"
+        "\\bkubernetes\\b",
+        "\\bk8s\\b"
     ],
     "git": [
-        "git"
+        "\\bgit\\b",
+        "\\bgithub\\b",
+        "\\bgitlab\\b"
     ],
     "tableau": [
-        "tableau"
+        "\\btableau\\b"
     ],
     "power_bi": [
-        "power bi",
-        "powerbi"
+        "\\bpower\\s*bi\\b",
+        "\\bpowerbi\\b"
     ],
     "looker": [
-        "looker"
+        "\\blooker\\b",
+        "\\blooker studio\\b"
     ],
     "tensorflow": [
-        "tensorflow"
+        "\\btensorflow\\b"
     ],
     "pytorch": [
-        "pytorch"
+        "\\bpytorch\\b"
     ],
     "scikit_learn": [
-        "scikit-learn"
+        "\\bscikit-learn\\b",
+        "\\bsklearn\\b"
     ],
     "langchain": [
-        "langchain"
+        "\\blangchain\\b"
     ],
     "mlflow": [
-        "mlflow"
+        "\\bmlflow\\b"
     ]
 }

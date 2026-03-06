@@ -5,7 +5,7 @@ import boto3
 import pandas as pd
 import html
 import re
-
+from pathlib import Path
 
 def s3_download(bucket: str, key: str, local_path: str) -> None:
     s3 = boto3.client("s3")
@@ -17,7 +17,13 @@ def s3_upload(bucket: str, key: str, local_path: str) -> None:
     s3 = boto3.client("s3")
     s3.upload_file(local_path, bucket, key)
 
+def load_skills_dictionary():
+    config_path = Path(__file__).resolve().parents[1] / "config" / "skills_dictionary.json"
 
+    with open(config_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+    
 def decode_html_recursive(text: str) -> str:
     previous = None
     while previous != text:
@@ -179,63 +185,25 @@ def get_role_family(title_clean: str | None) -> str | None:
 
     return "other"
 
-SKILL_PATTERNS = {
-    "python": [r"\bpython\b"],
-    "sql": [r"\bsql\b"],
-    "scala": [r"\bscala\b"],
-    "r": [r"\br\b"],
 
-    "spark": [r"\bspark\b"],
-    "pyspark": [r"\bpyspark\b"],
-    "kafka": [r"\bkafka\b"],
-    "hadoop": [r"\bhadoop\b"],
-
-    "dbt": [r"\bdbt\b"],
-    "airflow": [r"\bairflow\b"],
-    "databricks": [r"\bdatabricks\b"],
-    "snowflake": [r"\bsnowflake\b"],
-    "bigquery": [r"\bbigquery\b"],
-    "redshift": [r"\bredshift\b"],
-    "trino": [r"\btrino\b"],
-    "presto": [r"\bpresto\b"],
-
-    "aws": [r"\baws\b", r"\bamazon web services\b"],
-    "azure": [r"\bazure\b"],
-    "gcp": [r"\bgcp\b", r"\bgoogle cloud\b", r"\bgoogle cloud platform\b"],
-
-    "power_bi": [r"\bpower\s*bi\b"],
-    "tableau": [r"\btableau\b"],
-    "looker": [r"\blooker\b", r"\blooker studio\b"],
-
-    "pytorch": [r"\bpytorch\b"],
-    "tensorflow": [r"\btensorflow\b"],
-    "scikit_learn": [r"\bscikit-learn\b", r"\bsklearn\b"],
-    "mlflow": [r"\bmlflow\b"],
-    "langchain": [r"\blangchain\b"],
-
-    "docker": [r"\bdocker\b"],
-    "kubernetes": [r"\bkubernetes\b", r"\bk8s\b"],
-    "terraform": [r"\bterraform\b"],
-    "git": [r"\bgit\b", r"\bgithub\b", r"\bgitlab\b"],
-}
-
-
-def extract_skills(text: str | None) -> list[str]:
+def extract_skills(text: str | None, skills_dict: dict) -> list[str]:
     if text is None:
         return []
 
-    t = text.lower()
-    found = []
+    text = text.lower()
 
-    for skill, patterns in SKILL_PATTERNS.items():
-        for pattern in patterns:
-            if re.search(pattern, t):
-                found.append(skill)
+    found_skills = []
+
+    for skill, patterns in skills_dict.items():
+        for p in patterns:
+            if re.search(p, text):
+                found_skills.append(skill)
                 break
 
-    return sorted(found)
+    return sorted(set(found_skills))
 
-def flatten_offer(o: dict) -> dict:
+
+def flatten_offer(o: dict, skills_dict: dict) -> dict:
     lieu = o.get("lieuTravail") or {}
     ent = o.get("entreprise") or {}
     salaire = o.get("salaire") or {}
@@ -246,7 +214,8 @@ def flatten_offer(o: dict) -> dict:
     company = ent.get("nom")
     description = o.get("description")
     description_clean = clean_text_basic(description)
-
+    skills = extract_skills(description_clean, skills_dict)
+    
     return {
         "offer_id": o.get("id"),
         "title": title,
@@ -264,7 +233,7 @@ def flatten_offer(o: dict) -> dict:
         "salary_label": salaire.get("libelle") or salaire.get("commentaire"),
         "description": description,
         "description_clean": description_clean,
-        "skills": extract_skills(description_clean),
+        "skills": skills,
         "source": "francetravail",
     }
 
@@ -304,6 +273,8 @@ def main():
     print("Downloading:", f"s3://{bucket}/{raw_key}")
     s3_download(bucket, raw_key, local_raw)
 
+    skills_dict = load_skills_dictionary()
+    
     rows = []
     with open(local_raw, "r", encoding="utf-8") as f:
         for line in f:
@@ -311,7 +282,7 @@ def main():
             if not line:
                 continue
             o = json.loads(line)
-            rows.append(flatten_offer(o))
+            rows.append(flatten_offer(o, skills_dict))
 
     df = pd.DataFrame(rows)
     print("Rows:", len(df), "Cols:", len(df.columns))
