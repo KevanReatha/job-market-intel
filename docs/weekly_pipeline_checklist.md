@@ -139,8 +139,27 @@ After validation, the pipeline can be scheduled automatically.
 # 8. Example Athena Sanity Queries
 
 Row count check:
-
 ```sql
 SELECT COUNT(*)
 FROM job_market_intel.v2
 WHERE dt = 'YYYY-MM-DD';
+```
+
+Role distribution:
+```sql
+SELECT role_family, COUNT(*)
+FROM job_market_intel.v2
+WHERE dt = 'YYYY-MM-DD'
+GROUP BY role_family
+ORDER BY COUNT(*) DESC;
+```
+
+Top skills:
+```sql
+SELECT skill, COUNT(*)
+FROM job_market_intel.v2
+CROSS JOIN UNNEST(skills) AS t(skill)
+WHERE dt = 'YYYY-MM-DD'
+GROUP BY skill
+ORDER BY COUNT(*) DESC;
+```
