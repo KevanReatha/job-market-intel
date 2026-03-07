@@ -136,55 +136,297 @@ def get_role_family(title_clean: str | None) -> str | None:
 
     t = title_clean.lower().strip()
 
-    # False positives first
-    if "data center" in t:
-        return "false_positive"
+# -----------------------------
+    # 1. Out-of-scope / irrelevant jobs
+    # -----------------------------
+    out_of_scope_patterns = [
+        "data center",
+        "géotechnicien",
+        "geotechnicien",
+        "nucleaire",
+        "nucléaire",
+        "dessinateur projeteur",
+        "hardware",
+        "bâtiment",
+        "batiment",
+        "poste de travail",
+        "robotique industrielle",
+        "technicien eia",
+        "planificateur nucléaire",
+        "expert vol",
+        "génomique",
+        "genomique",
+        "géotech",
+        "geotech",
+    ]
 
-    # Most specific roles first
+    if any(p in t for p in out_of_scope_patterns):
+        return "other"
+
+    # vague / non-informative titles
+    if t in {"ide", "cdi ide", "idec", "expert"}:
+        return "other"
+
+    # -----------------------------
+    # 2. Strong patterns: AI / ML
+    # -----------------------------
+    if any(p in t for p in [
+        "machine learning engineer",
+        "ml engineer",
+        "ingénieur machine learning",
+        "ingenieur machine learning",
+        "devops machine learning",
+    ]):
+        return "machine_learning_engineer"
+
+    if any(p in t for p in [
+        "ai engineer",
+        "ia engineer",
+        "ingénieur ia",
+        "ingenieur ia",
+        "développeur intelligence artificielle",
+        "developpeur intelligence artificielle",
+        "développeur ia",
+        "developpeur ia",
+        "spécialiste ia",
+        "specialiste ia",
+        "datascientist expert en ia",
+        "consultant data / ia",
+        "alternance ingénieur en intelligence artificielle",
+        "alternance ingenieur en intelligence artificielle",
+        "alternance développeur ia",
+        "alternance developpeur ia",
+        "prompt engineering",
+        "genai",
+        "llm",
+        "agentique",
+        "data & ai",
+        "intelligence artificielle",
+    ]):
+        return "ai_engineer"
+
+    # -----------------------------
+    # 3. Strong patterns: DevOps / Cloud
+    # -----------------------------
+    if any(p in t for p in [
+        "ingénieur devops",
+        "ingenieur devops",
+        "devops engineer",
+        "devops microsoft",
+        "ingénieur.e d'études devops",
+        "ingenieur.e d'études devops",
+        "ingénieur build cloud",
+        "ingenieur build cloud",
+        "cloud public",
+        "devops plateforme ia",
+        "exploitation mainframe",
+        "systèmes linux",
+        "systemes linux",
+        "intégrateur systèmes linux",
+        "integrateur systemes linux",
+    ]):
+        return "devops_engineer"
+
+    # -----------------------------
+    # 4. Strong patterns: analytics / data
+    # -----------------------------
     if "analytics engineer" in t:
         return "analytics_engineer"
-
-    if "machine learning engineer" in t or "ml engineer" in t:
-        return "ml_engineer"
-
-    if "ai engineer" in t or "ia engineer" in t:
-        return "ai_engineer"
-
-    if "llm" in t or "genai" in t or "agentique" in t:
-        return "ai_engineer"
 
     if "data scientist" in t:
         return "data_scientist"
 
-    if "data engineer" in t or "data ingénieur" in t or "ingenieur data" in t or "ingénieur data" in t:
+    if any(p in t for p in [
+        "data analyst",
+        "analyste data",
+        "analyste de données",
+        "analyste de donnees",
+        "analyste de donnée",
+        "analyste de donnee",
+        "web analyst",
+    ]):
+        return "data_analyst"
+
+    if any(p in t for p in [
+        "business intelligence",
+        "bi analyst",
+        "analyste bi",
+        "bi developer",
+        "développeur bi",
+        "developpeur bi",
+        "consultant bi",
+        "data visualisation",
+        "data visualization",
+        "power bi",
+        "sap bo",
+    ]):
+        return "bi_analytics"
+
+    if any(p in t for p in [
+        "data engineer",
+        "data - engineer",
+        "data ingénieur",
+        "ingenieur data",
+        "ingénieur data",
+        "tech lead data",
+        "manager data factory",
+        "développeur etl",
+        "developpeur etl",
+        "mdm",
+        "ingénieur opex data",
+        "ingenieur opex data",
+        "analyste production informatique data",
+    ]):
         return "data_engineer"
 
-    if "architecte data" in t or "data architect" in t:
+    if any(p in t for p in [
+        "data gouvernance",
+        "data governance",
+        "data quality",
+        "master data",
+        "data steward",
+        "contrôleur de données",
+        "controleur de donnees",
+        "protect data",
+    ]):
+        return "data_governance"
+
+    if any(p in t for p in [
+        "architecte data",
+        "data architect",
+        "data platform",
+        "platform engineer",
+    ]):
         return "data_architect"
 
-    if "data platform" in t or "platform" in t:
-        return "data_platform"
+    # -----------------------------
+    # 5. Backend engineering
+    # -----------------------------
+    if any(p in t for p in [
+        "backend engineer",
+        "backend developer",
+        "ingénieur backend",
+        "ingenieur backend",
+        "développeur backend",
+        "developpeur backend",
+        "java backend",
+    ]):
+        return "backend_engineer"
+
+    # -----------------------------
+    # 6. Software architect
+    # -----------------------------
+    if any(p in t for p in [
+        "architecte logiciel",
+        "architecte logiciels",
+        "architecte solution",
+        "architecte solutions",
+        "architecte fonctionnel",
+        "architecte apps",
+        "architecte applicatif",
+    ]):
+        return "software_architect"
+
+    # -----------------------------
+    # 7. Software / application engineering
+    # -----------------------------
+    if any(p in t for p in [
+        "software engineer",
+        "software developer",
+        "ingénieur logiciel",
+        "ingenieur logiciel",
+        "ingénieur software",
+        "ingenieur software",
+        "ingénieur développement logiciel",
+        "ingenieur développement logiciel",
+        "ingénieur / ingénieure développement logiciel",
+        "ingénieur de développement logiciel",
+        "ingénieur / ingénieure d'étude logiciel informatique",
+        "développeur logiciel",
+        "developpeur logiciel",
+        "concepteur logiciel",
+        "concepteur développeur d'applications",
+        "concepteur developpeur d'applications",
+        "concepteur / conceptrice d'application informatique",
+        "concepteur / conceptrice logiciel informatique",
+        "développeur / développeuse d'application",
+        "developpeur / developpeuse d'application",
+        "développeur / développeuse logiciel ou d'application",
+        "developpeur / developpeuse logiciel ou d'application",
+        "développeur informatique",
+        "developpeur informatique",
+        "developpeur applicatif",
+        "informaticien / informaticienne d'application",
+        "programmeur",
+        "lead developer",
+        "développeur java",
+        "developpeur java",
+        "développeur .net",
+        "developpeur .net",
+        "développeur c++",
+        "developpeur c++",
+        "développeur drupal",
+        "developpeur drupal",
+        "développeur windev",
+        "developpeur windev",
+        "développeur expérimenté",
+        "developpeur expérimenté",
+        "développeur fullstack",
+        "developpeur fullstack",
+        "tech lead java",
+        "responsable développement - java",
+        "responsable developpement - java",
+        "chef de projet logiciel",
+        "gestionnaire applicatif",
+        "responsable activité logiciel",
+        "responsable activite logiciel",
+        "responsable d'application",
+        "responsable d'application informatique",
+        "logiciel embarqué",
+        "logiciel embarque",
+        "expert logiciel embarqué",
+        "expert logiciel embarque",
+        "qualification et validation logiciel",
+        "qualité logiciel",
+        "qualite logiciel",
+        "responsable technique logiciel embarqué",
+        "responsable technique logiciel embarque",
+        "ingénieur qualité logiciel",
+        "ingenieur qualite logiciel",
+    ]):
+        return "software_engineer"
+
+    # -----------------------------
+    # 8. Management / projects
+    # -----------------------------
+    if any(p in t for p in [
+        "head of data",
+        "data manager",
+        "manager data optimisation",
+        "manager data optimization",
+        "manager data & ai",
+    ]):
+        return "data_management"
 
     if "chef de projet data" in t:
         return "data_project"
 
-    if "data gouvernance" in t or "data governance" in t:
-        return "data_governance"
-
-    if "data quality" in t or "master data" in t:
-        return "data_governance"
-
-    if "data analyst" in t or "analyste data" in t:
+    # -----------------------------
+    # 9. Contextual fallback rules
+    # -----------------------------
+    if "analyste" in t and ("donnée" in t or "donnee" in t or "donnees" in t or "données" in t):
         return "data_analyst"
 
-    if "business intelligence" in t or "power bi" in t or "bi " in t or "& bi" in t or "/ bi" in t:
-        return "bi_analytics"
+    if ("ingénieur" in t or "ingenieur" in t) and ("logiciel" in t or "software" in t):
+        return "software_engineer"
 
-    if "head of data" in t or "data manager" in t:
-        return "data_management"
+    if ("développeur" in t or "developpeur" in t) and ("java" in t or ".net" in t or "c++" in t):
+        return "software_engineer"
+
+    if ("devops" in t or "cloud" in t) and ("ingénieur" in t or "ingenieur" in t or "architecte" in t):
+        return "devops_engineer"
 
     return "other"
-
 
 def extract_skills(text: str | None, skills_dict: dict) -> list[str]:
     if text is None:
@@ -234,6 +476,7 @@ def flatten_offer(o: dict, skills_dict: dict) -> dict:
         "description": description,
         "description_clean": description_clean,
         "skills": skills,
+        "search_keyword": o.get("search_keyword"),
         "source": "francetravail",
     }
 
@@ -294,12 +537,12 @@ def main():
     bucket = os.getenv("S3_BUCKET", "job-market-intel-kevan")
     dt = os.getenv("DT", datetime.date.today().isoformat())
 
-    raw_key = f"raw/francetravail/offres/v2/dt={dt}/offres_paris_{dt}.jsonl"
-    local_raw = f"/tmp/offres_{dt}.jsonl"
+    raw_key = f"raw/francetravail/offres/v2/dt={dt}/offres_tech_france_{dt}.jsonl"
+    local_raw = f"/tmp/offres_tech_france_{dt}.jsonl"
 
     # dt stays in the S3 path only (partition), not in parquet columns
-    stage_key = f"stage/francetravail/offres/v2/dt={dt}/offres_paris_{dt}.parquet"
-    local_parquet = f"/tmp/offres_{dt}.parquet"
+    stage_key = f"stage/francetravail/offres/v2/dt={dt}/offres_tech_france_{dt}.parquet"
+    local_parquet = f"/tmp/offres_tech_france_{dt}.parquet"
 
     print("Downloading:", f"s3://{bucket}/{raw_key}")
     s3_download(bucket, raw_key, local_raw)
@@ -316,10 +559,18 @@ def main():
             rows.append(flatten_offer(o, skills_dict))
 
     df = pd.DataFrame(rows)
-    print("Rows:", len(df), "Cols:", len(df.columns))
+
+    raw_rows = len(df)
+    df = df.drop_duplicates(subset=["offer_id"]).copy()
+    deduped_rows = len(df)
+    duplicates_removed = raw_rows - deduped_rows
+
+    print("Rows raw:", raw_rows, "Cols:", len(df.columns))
+    print("Rows deduped:", deduped_rows)
+    print("Duplicates removed:", duplicates_removed)
 
     run_quality_checks(df, dt)
-    
+
     print_dataset_summary(df)
     
     df.to_parquet(local_parquet, index=False)
