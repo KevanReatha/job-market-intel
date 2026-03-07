@@ -15,7 +15,16 @@
         "\\bscala\\b"
     ],
     "r": [
-        "\\br\\b"
+        "\\brstudio\\b",
+        "\\bshiny\\b",
+        "\\btidyverse\\b",
+        "\\bggplot2\\b",
+        "\\bdplyr\\b",
+        "\\bcaret\\b",
+        "\\blangage r\\b",
+        "\\br language\\b",
+        "(?:(?:python|sql|tableau|power bi)[\\s,;/()\\-]+r\\b)",
+        "(?:\\br\\b[\\s,;/()\\-]+(?:python|sql|tableau|power bi))"
     ],
     "airflow": [
         "\\bairflow\\b"
@@ -91,5 +100,77 @@
     ],
     "mlflow": [
         "\\bmlflow\\b"
+    ],
+    "java": [
+        "\\bjava\\b"
+    ],
+    "go": [
+        "\\bgo\\b",
+        "\\bgolang\\b"
+    ],
+    "rust": [
+        "\\brust\\b"
+    ],
+    "javascript": [
+        "\\bjavascript\\b",
+        "\\bjs\\b"
+    ],
+    "typescript": [
+        "\\btypescript\\b",
+        "\\bts\\b"
+    ],
+    "spring": [
+        "\\bspring\\b",
+        "\\bspring boot\\b"
+    ],
+    "node": [
+        "\\bnode\\b",
+        "\\bnodejs\\b"
+    ],
+    "fastapi": [
+        "\\bfastapi\\b"
+    ],
+    "django": [
+        "\\bdjango\\b"
+    ],
+    "flask": [
+        "\\bflask\\b"
+    ],
+    "grpc": [
+        "\\bgrpc\\b"
+    ],
+    "rest_api": [
+        "\\brest api\\b",
+        "\\brestful\\b"
+    ],
+    "graphql": [
+        "\\bgraphql\\b"
+    ],
+    "trino": [
+        "\\btrino\\b"
+    ],
+    "presto": [
+        "\\bpresto\\b"
+    ],
+    "hadoop": [
+        "\\bhadoop\\b"
+    ],
+    "flink": [
+        "\\bflink\\b"
+    ],
+    "huggingface": [
+        "\\bhuggingface\\b"
+    ],
+    "llamaindex": [
+        "\\bllamaindex\\b"
+    ],
+    "helm": [
+        "\\bhelm\\b"
+    ],
+    "prometheus": [
+        "\\bprometheus\\b"
+    ],
+    "grafana": [
+        "\\bgrafana\\b"
     ]
 }
