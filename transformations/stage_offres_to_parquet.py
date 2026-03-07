@@ -258,7 +258,38 @@ def run_quality_checks(df: pd.DataFrame, dt: str) -> None:
     print(f"[QUALITY] relevant_role_family_pct={relevant_role_pct}")
     print(f"[QUALITY] company_name_clean_populated_pct={company_pct}")
     
+def print_dataset_summary(df: pd.DataFrame) -> None:
+    print("\n[SUMMARY]")
 
+    total_offers = len(df)
+    print(f"offers: {total_offers}")
+
+    unique_roles = df["role_family"].nunique(dropna=True)
+    print(f"unique_roles: {unique_roles}")
+
+    # Flatten skills list
+    all_skills = []
+    for skills in df["skills"]:
+        if skills:
+            all_skills.extend(skills)
+
+    unique_skills = len(set(all_skills))
+    print(f"unique_skills: {unique_skills}")
+
+    # Top roles
+    print("\ntop_roles:")
+    top_roles = df["role_family"].value_counts().head(5)
+    for role, count in top_roles.items():
+        print(f"  {role}: {count}")
+
+    # Top skills
+    print("\ntop_skills:")
+    if all_skills:
+        skill_counts = pd.Series(all_skills).value_counts().head(5)
+        for skill, count in skill_counts.items():
+            print(f"  {skill}: {count}")
+            
+            
 def main():
     bucket = os.getenv("S3_BUCKET", "job-market-intel-kevan")
     dt = os.getenv("DT", datetime.date.today().isoformat())
@@ -288,6 +319,8 @@ def main():
     print("Rows:", len(df), "Cols:", len(df.columns))
 
     run_quality_checks(df, dt)
+    
+    print_dataset_summary(df)
     
     df.to_parquet(local_parquet, index=False)
     print("Saved parquet locally:", local_parquet)
