@@ -26,3 +26,6 @@ docs/data_lake_structure.md
 - AWS S3
 - Boto3
 - France Travail API
+
+## Notes
+Raw datasets are stored in S3 and not versioned in Git.
