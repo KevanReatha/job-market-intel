@@ -133,13 +133,14 @@ def main():
 
     departement = os.getenv("FT_DEPARTEMENT")
 
-    filename = f"offres_tech_france_{today}.jsonl"
-    s3_key = f"{PREFIX}/dt={today}/{filename}"
+    local_filename = f"/tmp/offres_tech_france_{today}.jsonl"
+    s3_filename = f"offres_tech_france_{today}.jsonl"
+    s3_key = f"{PREFIX}/dt={today}/{s3_filename}"
 
     total_count = 0
     keyword_counts = {}
 
-    with open(filename, "w", encoding="utf-8") as f:
+    with open(local_filename, "w", encoding="utf-8") as f:
         for keyword in SEARCH_KEYWORDS:
             print(f"\n=== Fetching keyword: {keyword} ===")
             keyword_count = 0
@@ -154,15 +155,18 @@ def main():
             print(f"Finished keyword='{keyword}' -> rows={keyword_count}")
 
     print("\n=== INGESTION SUMMARY ===")
-    print("Saved locally:", filename)
+    print("Saved locally:", local_filename)
     print("Total rows written:", total_count)
     print("Rows by keyword:")
     for keyword, count in keyword_counts.items():
         print(f"  {keyword}: {count}")
 
     s3 = boto3.client("s3")
-    s3.upload_file(filename, BUCKET, s3_key)
+    s3.upload_file(local_filename, BUCKET, s3_key)
     print("Uploaded to S3:", f"s3://{BUCKET}/{s3_key}")
+
+    os.remove(local_filename)
+    print("Removed local temp file:", local_filename)
 
 
 if __name__ == "__main__":
