@@ -6,6 +6,12 @@ The project ingests job offers weekly, transforms them into structured analytics
 
 ---
 
+## Dashboard Preview
+
+![Dashboard](docs/images/dashboard_preview_v1_1.png)
+![Dashboard](docs/images/dashboard_preview_v1_2.png)
+![Dashboard](docs/images/dashboard_preview_v1_3.png)
+
 # Project Goal
 
 The objective of this project is to understand **technology job market demand** by answering questions such as:
