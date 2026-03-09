@@ -22,3 +22,7 @@ venv/
 EOF
 
 !config/skills_dictionary.json
+
+logs/
+job_market_intel_dbt/logs/
+job_market_intel_dbt/target/

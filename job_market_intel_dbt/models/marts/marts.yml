@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: mart_role_demand
+    description: "Demand aggregated by role family."
+    columns:
+      - name: role_family
+        tests:
+          - not_null
+
+      - name: demand
+        tests:
+          - not_null

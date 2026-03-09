@@ -1,0 +1,20 @@
+version: 2
+
+models:
+  - name: stg_offres_view
+    description: "Staging model for enriched France Travail offers loaded into Snowflake."
+    columns:
+      - name: offer_id
+        description: "Unique offer identifier."
+        tests:
+          - not_null
+          - unique
+
+      - name: role_family
+        description: "Rule-based role classification."
+
+      - name: seniority_level
+        description: "Rule-based seniority inference."
+
+      - name: domain_focus
+        description: "Rule-based domain focus inference."
