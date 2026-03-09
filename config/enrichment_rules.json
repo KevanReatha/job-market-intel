@@ -1,0 +1,192 @@
+{
+    "hiring_industry": {
+        "banking_finance": [
+            "banque",
+            "bancaire",
+            "services financiers",
+            "financial services",
+            "marches financiers",
+            "gestion d'actifs",
+            "asset management",
+            "trading",
+            "crypto"
+        ],
+        "insurance": [
+            "assurance",
+            "assureur",
+            "mutuelle",
+            "sinistre"
+        ],
+        "retail_ecommerce": [
+            "retail",
+            "distribution",
+            "e-commerce",
+            "ecommerce",
+            "magasin",
+            "order-book"
+        ],
+        "consulting_services": [
+            "cabinet de conseil",
+            "consulting",
+            "esn",
+            "services numeriques",
+            "mission chez un client",
+            "clients grands comptes"
+        ],
+        "travel_hospitality": [
+            "tourisme",
+            "vacances",
+            "hospitality",
+            "resort",
+            "club med",
+            "pierre et vacances",
+            "center parcs"
+        ],
+        "public_sector": [
+            "secteur public",
+            "administration",
+            "ministere",
+            "collectivite",
+            "fonction publique"
+        ],
+        "health_research": [
+            "sante",
+            "medical",
+            "pharma",
+            "biologie",
+            "hopital",
+            "clinique",
+            "inserm"
+        ],
+        "aerospace_defense": [
+            "aeronautique",
+            "aerospatial",
+            "defense",
+            "aviation",
+            "safran"
+        ],
+        "manufacturing_industry": [
+            "nucleaire",
+            "centrales",
+            "usine",
+            "manufacturing"
+        ],
+        "tech_product": [
+            "saas",
+            "startup",
+            "plateforme technologique",
+            "digital product",
+            "produit digital"
+        ]
+    },
+    "seniority_level": {
+        "intern_apprentice": [
+            "stagiaire",
+            "alternance",
+            "apprentissage",
+            "intern"
+        ],
+        "junior": [
+            "junior",
+            "debutant",
+            "premiere experience"
+        ],
+        "senior": [
+            "senior",
+            "experimente",
+            "confirme"
+        ],
+        "lead": [
+            "tech lead",
+            "lead tech",
+            "team lead"
+        ],
+        "manager": [
+            "engineering manager",
+            "data manager",
+            "manager data",
+            "manager analytics",
+            "chef de projet"
+        ],
+        "architect_principal": [
+            "architecte",
+            "principal",
+            "design authority"
+        ]
+    },
+    "domain_focus": {
+        "data_platform": [
+            "data factory",
+            "data platform",
+            "etl",
+            "elt",
+            "datalake",
+            "data warehouse",
+            "bigquery",
+            "databricks",
+            "spark",
+            "pyspark",
+            "airflow",
+            "dataform",
+            "sqlx",
+            "pipeline"
+        ],
+        "bi_reporting": [
+            "power bi",
+            "tableau",
+            "looker",
+            "looker studio",
+            "business intelligence",
+            "sap bi"
+        ],
+        "ml_ai": [
+            "machine learning",
+            "tensorflow",
+            "keras",
+            "pytorch",
+            "mlflow",
+            "vertex ai"
+        ],
+        "genai_llm": [
+            "llm",
+            "genai",
+            "intelligence artificielle generative",
+            "rag",
+            "langchain",
+            "langfuse",
+            "flowise",
+            "n8n"
+        ],
+        "data_governance_quality": [
+            "data quality",
+            "qualite des donnees",
+            "data governance",
+            "gouvernance",
+            "catalogue de donnees",
+            "data steward"
+        ],
+        "cloud_devops": [
+            "terraform",
+            "kubernetes",
+            "helm",
+            "ci/cd",
+            "gitlab ci",
+            "github actions",
+            "docker",
+            "prometheus",
+            "grafana",
+            "devops"
+        ],
+        "analytics_product": [
+            "data product",
+            "people analytics",
+            "analytics engineer"
+        ],
+        "embedded_iot": [
+            "embarque",
+            "temps reel",
+            "iot",
+            "robotique"
+        ]
+    }
+}
