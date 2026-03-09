@@ -19,7 +19,7 @@ def get_connection():
         role=st.secrets["SNOWFLAKE_ROLE"],
     )
 
-@st.cache_data(ttl=300)
+@st.cache_data
 def run_query(query: str) -> pd.DataFrame:
     conn = get_connection()
     try:
