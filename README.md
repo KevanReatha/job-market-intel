@@ -47,6 +47,7 @@ Beyond analytics, the project also demonstrates a **realistic analytics engineer
 ---
 
 # Architecture Overview
+```text
 France Travail API
         │
         ▼
@@ -71,7 +72,7 @@ Staging + Marts Layer
         ▼
 Streamlit
 Analytics Dashboard
-
+```
 
 ---
 
@@ -86,7 +87,7 @@ The project was intentionally built in **iterations**, each introducing new capa
 The first version focused on building a **complete end-to-end data pipeline**.
 
 ### Architecture
-
+```text
 France Travail API  
 ↓  
 GitHub Actions ingestion  
@@ -98,7 +99,7 @@ Python transformations
 Analytics parquet datasets  
 ↓  
 Streamlit dashboard
-
+```
 ### Capabilities
 
 - Weekly ingestion pipeline
@@ -158,7 +159,7 @@ These enrichments allow deeper analysis of job market demand by **experience lev
 Version 2 transforms the project into a **modern analytics engineering platform** using a warehouse and transformation framework.
 
 ### V2 Architecture
-
+```text
 France Travail API  
 ↓  
 GitHub Actions ingestion  
@@ -175,7 +176,7 @@ dbt staging model
 dbt analytics marts  
 ↓  
 Streamlit dashboard connected to Snowflake
-
+```
 ---
 
 # Technology Stack
