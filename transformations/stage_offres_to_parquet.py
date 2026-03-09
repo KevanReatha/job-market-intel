@@ -6,6 +6,7 @@ import pandas as pd
 import html
 import re
 from pathlib import Path
+import unicodedata
 
 def s3_download(bucket: str, key: str, local_path: str) -> None:
     s3 = boto3.client("s3")
@@ -23,7 +24,112 @@ def load_skills_dictionary():
     with open(config_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
-    
+def load_enrichment_rules(path="config/enrichment_rules.json"):
+    with open(path, "r") as f:
+        return json.load(f)
+
+RULES = load_enrichment_rules()
+
+def normalize_text(text: str | None) -> str:
+    if not text:
+        return ""
+
+    text = text.lower()
+    text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("utf-8")
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
+
+
+def keyword_match(text: str, keyword: str) -> bool:
+    text_norm = normalize_text(text)
+    kw_norm = normalize_text(keyword)
+
+    pattern = r"\b" + re.escape(kw_norm) + r"\b"
+    return re.search(pattern, text_norm) is not None
+
+
+def score_categories(text: str | None, rules_dict: dict) -> dict:
+    text_norm = normalize_text(text)
+
+    if not text_norm:
+        return {}
+
+    scores = {}
+
+    for category, keywords in rules_dict.items():
+        score = 0
+
+        for kw in keywords:
+            if keyword_match(text_norm, kw):
+                score += 1
+
+        if score > 0:
+            scores[category] = score
+
+    return scores
+
+
+def infer_category(text: str | None, rules_dict: dict, multi_sector_enabled: bool = False) -> str:
+    scores = score_categories(text, rules_dict)
+
+    if not scores:
+        return "unknown"
+
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+    top_category, top_score = sorted_scores[0]
+
+    if multi_sector_enabled and len(sorted_scores) > 1:
+        second_category, second_score = sorted_scores[1]
+
+        if top_score >= 2 and second_score >= 2 and (top_score - second_score) <= 1:
+            return "multi_sector"
+
+    return top_category
+
+
+def infer_hiring_industry(description: str | None) -> str:
+    return infer_category(
+        description,
+        RULES["hiring_industry"],
+        multi_sector_enabled=True
+    )
+
+
+def infer_seniority(title: str | None, description: str | None) -> str:
+
+    # Priority 1: title
+    title_result = infer_category(title, RULES["seniority_level"])
+
+    if title_result != "unknown":
+        return title_result
+
+    # Priority 2: description (restricted)
+    desc_result = infer_category(description, RULES["seniority_level"])
+
+    if desc_result in ["junior", "intern_apprentice", "senior"]:
+        return desc_result
+
+    return "unknown"
+
+def infer_domain_focus(title: str | None, description: str | None) -> str:
+    title_scores = score_categories(title, RULES["domain_focus"])
+    description_scores = score_categories(description, RULES["domain_focus"])
+
+    combined_scores = {}
+
+    for category, score in description_scores.items():
+        combined_scores[category] = combined_scores.get(category, 0) + score
+
+    for category, score in title_scores.items():
+        # title gets stronger weight
+        combined_scores[category] = combined_scores.get(category, 0) + (score * 2)
+
+    if not combined_scores:
+        return "unknown"
+
+    return max(combined_scores, key=combined_scores.get)
+        
 def decode_html_recursive(text: str) -> str:
     previous = None
     while previous != text:
@@ -452,12 +558,19 @@ def flatten_offer(o: dict, skills_dict: dict) -> dict:
 
     title = o.get("intitule")
     title_clean = clean_title(title)
-    
+
     company = ent.get("nom")
+    company_name_clean = clean_company(company)
+
     description = o.get("description")
     description_clean = clean_text_basic(description)
+
     skills = extract_skills(description_clean, skills_dict)
-    
+
+    hiring_industry = infer_hiring_industry(description_clean)
+    seniority_level = infer_seniority(title_clean, description_clean)
+    domain_focus = infer_domain_focus(title_clean, description_clean)
+
     return {
         "offer_id": o.get("id"),
         "title": title,
@@ -469,13 +582,16 @@ def flatten_offer(o: dict, skills_dict: dict) -> dict:
         "updated_at": o.get("dateActualisation"),
         "department_or_location": lieu.get("libelle"),
         "company_name": company,
-        "company_name_clean": clean_company(company),
+        "company_name_clean": company_name_clean,
         "contract_type": o.get("typeContrat"),
         "contract_label": o.get("typeContratLibelle"),
         "salary_label": salaire.get("libelle") or salaire.get("commentaire"),
         "description": description,
         "description_clean": description_clean,
         "skills": skills,
+        "hiring_industry": hiring_industry,
+        "seniority_level": seniority_level,
+        "domain_focus": domain_focus,
         "search_keyword": o.get("search_keyword"),
         "source": "francetravail",
     }
@@ -579,6 +695,28 @@ def main():
     print("Uploading:", f"s3://{bucket}/{stage_key}")
     s3_upload(bucket, stage_key, local_parquet)
     print("Done.")
+    
+    print(
+    df[[
+        "title_clean",
+        "hiring_industry",
+        "seniority_level",
+        "domain_focus"
+    ]]
+    .head(15)
+    .to_string(index=False)
+    )
+    
+    print("\nCoverage check\n")
+
+    print("industry:")
+    print(df["hiring_industry"].value_counts(dropna=False))
+
+    print("\nseniority:")
+    print(df["seniority_level"].value_counts(dropna=False))
+
+    print("\ndomain focus:")
+    print(df["domain_focus"].value_counts(dropna=False))
 
 
 if __name__ == "__main__":
