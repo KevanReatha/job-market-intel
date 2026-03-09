@@ -12,6 +12,8 @@ The project ingests job offers weekly, transforms them into structured analytics
 ![Dashboard](docs/images/dashboard_preview_v1_2.png)
 ![Dashboard](docs/images/dashboard_preview_v1_3.png)
 
+---
+
 # Project Goal
 
 The objective of this project is to understand **technology job market demand** by answering questions such as:
@@ -20,6 +22,8 @@ The objective of this project is to understand **technology job market demand** 
 - Which technical skills are growing?
 - What skills are associated with each role?
 - How does demand evolve over time?
+- What seniority levels are most demanded?
+- Which technical domains are associated with each role?
 
 This project also demonstrates an **end-to-end data engineering pipeline**.
 
@@ -28,16 +32,17 @@ This project also demonstrates an **end-to-end data engineering pipeline**.
 # Architecture
 
 Pipeline overview:
-France Travail API
-↓
-GitHub Actions (weekly ingestion)
-↓
-S3 raw JSONL storage
-↓
-Python transformations
-↓
-Analytics parquet datasets
-↓
+
+France Travail API  
+↓  
+GitHub Actions (weekly ingestion)  
+↓  
+S3 raw JSONL storage  
+↓  
+Python transformations  
+↓  
+Analytics parquet datasets  
+↓  
 Streamlit dashboard
 
 ---
@@ -70,16 +75,50 @@ The weekly pipeline performs the following steps:
 
 1. Fetch job offers from France Travail API  
 2. Store raw data in JSONL format in S3  
-3. Transform data into parquet datasets  
-4. Extract skills and role classifications  
-5. Build analytics datasets  
-6. Serve insights in a Streamlit dashboard
+3. Clean and normalize job descriptions  
+4. Extract skills from job descriptions  
+5. Classify job roles  
+6. Enrich offers with inferred attributes
+7. Build analytics datasets  
+8. Serve insights in a Streamlit dashboard
+
+---
+
+# Data Enrichment (V1.1)
+
+Version 1.1 introduces rule-based NLP enrichment to extract additional insights from job descriptions.
+
+New inferred attributes:
+
+### Seniority Level
+
+- intern_apprentice
+- junior
+- mid
+- senior
+- lead
+- manager
+- architect_principal
+
+### Domain Focus
+
+- data_platform
+- bi_reporting
+- ml_ai
+- genai_llm
+- cloud_devops
+- data_governance_quality
+- embedded_iot
+
+These enrichments allow deeper analysis of the job market beyond simple role classification.
 
 ---
 
 # Analytics Datasets
 
-The project generates three core datasets.
+The project now generates **five analytics datasets**.
+
+---
 
 ## skill_demand
 
@@ -118,33 +157,60 @@ Columns:
 
 ---
 
+## role_demand_by_seniority (V1.1)
+
+Demand distribution by role and seniority level.
+
+Columns:
+
+- `role_family`
+- `seniority_level`
+- `demand`
+- `dt`
+
+---
+
+## role_demand_by_domain_focus (V1.1)
+
+Demand distribution by role and technical domain.
+
+Columns:
+
+- `role_family`
+- `domain_focus`
+- `demand`
+- `dt`
+
+---
+
 # Example Insights
 
 Initial results show:
 
-- Software engineering dominates job demand
-- Top skills include SQL, Python, Java, Git and cloud technologies
-- Data engineering roles strongly correlate with SQL, Python, Spark and cloud platforms
+- Software engineering roles dominate overall demand
+- Data analyst roles are strongly associated with BI and reporting tools
+- Data engineering roles correlate with SQL, Python, Spark and cloud technologies
+- AI engineering roles are strongly linked to GenAI and ML topics
+- Entry-level demand is highest for analyst-type roles
 
 ---
 
-# Limitations (V1)
+# Limitations
 
 Current version has several limitations:
 
 - Role classification is rule-based
-- Some offers fall into the "other" category
 - Skill extraction relies on keyword matching
-- Historical data is still limited
-- Dashboard UI is minimal
+- Industry inference is experimental
+- Some offers fall into the "other" category
+- Historical data coverage is still limited
+- Dashboard UX is intentionally simple
 
 ---
 
 # Roadmap
 
-## V1 — Working MVP
-
-Completed features:
+## V1 — MVP (Completed)
 
 - Weekly ingestion pipeline
 - Raw data storage in S3
@@ -156,33 +222,36 @@ Completed features:
 
 ---
 
-## V2 — Industrialized Data Platform
+## V1.1 — Enriched Insights (Completed)
+
+- Seniority level inference
+- Domain focus inference
+- New analytics datasets
+- Extended dashboard insights
+
+---
+
+## V2 — Advanced Analytics
 
 Planned improvements:
 
+- Skill demand growth analysis
+- Industry demand insights
+- Job market trend detection
+- Improved dashboard UX
+
+---
+
+## V3 — Data Platform
+
+Future improvements:
+
 - Snowflake data warehouse
 - dbt transformation models
-- Improved semantic data model
-- Better dashboard UX
-- Time-series analytics
+- Semantic data layer
 
 ---
 
-## V3 — Machine Learning
+## V4 — AI Job Market Copilot
 
-Future features:
-
-- Skill demand forecasting
-- Role demand forecasting
-- Trend detection
-
----
-
-## V4 — AI Copilot
-
-Long-term vision:
-
-- Natural language job market exploration
-- Skill gap recommendations
-- Career path insights
-
+Long-term vision
