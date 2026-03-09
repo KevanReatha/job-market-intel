@@ -264,6 +264,7 @@ Initial analysis reveals several patterns:
 ---
 
 # Repository Structure
+```text 
 job-market-intel
 │
 ├── dashboard
@@ -295,7 +296,7 @@ job-market-intel
 │           ├── mart_skill_trends_by_month.sql
 │           ├── mart_role_trends_by_month.sql
 │           └── marts.yml
-
+```
 
 ---
 
