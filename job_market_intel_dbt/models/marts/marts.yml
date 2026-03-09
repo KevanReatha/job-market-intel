@@ -86,3 +86,16 @@ models:
       - name: demand
         tests:
           - not_null
+
+  - name: mart_role_trends_by_month
+    description: "Monthly demand trend for each role family."
+    columns:
+      - name: month
+        tests:
+          - not_null
+      - name: role_family
+        tests:
+          - not_null
+      - name: demand
+        tests:
+          - not_null
