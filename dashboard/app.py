@@ -1,213 +1,180 @@
 import streamlit as st
 import pandas as pd
-import boto3
+import snowflake.connector
 import plotly.express as px
-from io import BytesIO
-import os
-
-BUCKET = os.getenv("S3_BUCKET", "job-market-intel-kevan")
 
 st.set_page_config(page_title="AI Job Market Intelligence", layout="wide")
 
 st.title("AI / Data Job Market Intelligence")
-st.caption("Weekly job market demand based on France Travail API")
+st.caption("Analytics powered by Snowflake marts")
 
-s3 = boto3.client("s3")
+def get_connection():
+    return snowflake.connector.connect(
+        account=st.secrets["SNOWFLAKE_ACCOUNT"],
+        user=st.secrets["SNOWFLAKE_USER"],
+        password=st.secrets["SNOWFLAKE_PASSWORD"],
+        warehouse=st.secrets["SNOWFLAKE_WAREHOUSE"],
+        database=st.secrets["SNOWFLAKE_DATABASE"],
+        schema=st.secrets["SNOWFLAKE_SCHEMA"],
+        role=st.secrets["SNOWFLAKE_ROLE"],
+    )
 
+@st.cache_data(ttl=300)
+def run_query(query: str) -> pd.DataFrame:
+    conn = get_connection()
+    try:
+        return pd.read_sql(query, conn)
+    finally:
+        conn.close()
 
-@st.cache_data
-def load_parquet(key):
-    obj = s3.get_object(Bucket=BUCKET, Key=key)
-    return pd.read_parquet(BytesIO(obj["Body"].read()))
+# Load marts
+role_demand = run_query("""
+    select *
+    from JOB_MARKET_INTEL.MART.MART_ROLE_DEMAND
+""")
 
+skill_demand = run_query("""
+    select *
+    from JOB_MARKET_INTEL.MART.MART_SKILL_DEMAND
+""")
 
-@st.cache_data
-def load_multiple_parquets(prefix):
-    response = s3.list_objects_v2(Bucket=BUCKET, Prefix=prefix)
+role_skill_demand = run_query("""
+    select *
+    from JOB_MARKET_INTEL.MART.MART_ROLE_SKILL_DEMAND
+""")
 
-    frames = []
+role_demand_by_seniority = run_query("""
+    select *
+    from JOB_MARKET_INTEL.MART.MART_ROLE_DEMAND_BY_SENIORITY
+""")
 
-    for obj in response.get("Contents", []):
-        key = obj["Key"]
+role_demand_by_domain_focus = run_query("""
+    select *
+    from JOB_MARKET_INTEL.MART.MART_ROLE_DEMAND_BY_DOMAIN_FOCUS
+""")
 
-        if key.endswith(".parquet"):
-            data = load_parquet(key)
+skill_trends_by_month = run_query("""
+    select *
+    from JOB_MARKET_INTEL.MART.MART_SKILL_TRENDS_BY_MONTH
+""")
 
-            dt = key.split("dt=")[1].split("/")[0]
-            data["dt"] = dt
+role_trends_by_month = run_query("""
+    select *
+    from JOB_MARKET_INTEL.MART.MART_ROLE_TRENDS_BY_MONTH
+""")
 
-            frames.append(data)
-
-    if not frames:
-        return pd.DataFrame()
-
-    return pd.concat(frames, ignore_index=True)
-
-
-# Load analytics tables
-skills = load_multiple_parquets("analytics/skill_demand/v1/")
-roles = load_multiple_parquets("analytics/role_demand/v1/")
-role_skills = load_multiple_parquets("analytics/role_skill_demand/v1/")
-role_seniority = load_multiple_parquets("analytics/role_demand_by_seniority/v1/")
-role_domain_focus = load_multiple_parquets("analytics/role_demand_by_domain_focus/v1/")
-
-# KPI metrics
+# KPI
 col1, col2, col3 = st.columns(3)
+col1.metric("Unique Roles", role_demand["ROLE_FAMILY"].nunique())
+col2.metric("Unique Skills", skill_demand["SKILL"].nunique())
+col3.metric("Role-Skill Pairs", len(role_skill_demand))
 
-col1.metric("Total Skills Detected", len(skills))
-col2.metric("Total Roles Detected", len(roles["role_family"].unique()) if not roles.empty else 0)
-col3.metric("Role-Skill Relationships", len(role_skills))
-
-# Sidebar filters
+# Sidebar
 st.sidebar.title("Filters")
-
-available_roles = sorted(role_skills["role_family"].dropna().unique())
-
 selected_role = st.sidebar.selectbox(
     "Select role",
-    available_roles
+    sorted(role_demand["ROLE_FAMILY"].dropna().unique())
 )
 
-# Charts section
+# Top charts
 col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("Top Skills")
-
-    skills_sorted = (
-        skills.groupby("skill", as_index=False)["demand"]
-        .sum()
-        .sort_values("demand", ascending=False)
-        .head(20)
-    )
-
-    fig = px.bar(
-        skills_sorted,
-        x="skill",
-        y="demand",
-        title="Top Skills"
-    )
-
+    top_skills = skill_demand.sort_values("DEMAND", ascending=False).head(20)
+    fig = px.bar(top_skills, x="SKILL", y="DEMAND", title="Top Skills")
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     st.subheader("Top Roles")
-
-    roles_sorted = (
-        roles.groupby("role_family", as_index=False)["demand"]
-        .sum()
-        .sort_values("demand", ascending=False)
-        .head(20)
-    )
-
-    fig = px.bar(
-        roles_sorted,
-        x="role_family",
-        y="demand",
-        title="Top Roles"
-    )
-
+    top_roles = role_demand.sort_values("DEMAND", ascending=False).head(20)
+    fig = px.bar(top_roles, x="ROLE_FAMILY", y="DEMAND", title="Top Roles")
     st.plotly_chart(fig, use_container_width=True)
 
-# Role skill section
+# Top skills by role
 st.subheader("Top Skills by Role")
-
-filtered = role_skills[
-    role_skills["role_family"] == selected_role
-].copy()
-
-filtered = (
-    filtered.groupby("skill", as_index=False)["demand"]
-    .sum()
-    .sort_values("demand", ascending=False)
-    .head(10)
-)
+role_skill_filtered = role_skill_demand[
+    role_skill_demand["ROLE_FAMILY"] == selected_role
+].sort_values("DEMAND", ascending=False).head(10)
 
 fig = px.bar(
-    filtered,
-    x="skill",
-    y="demand",
+    role_skill_filtered,
+    x="SKILL",
+    y="DEMAND",
     title=f"Top Skills for {selected_role}"
 )
-
 st.plotly_chart(fig, use_container_width=True)
 
-# Skill trend section
-st.subheader("Skill Trend Over Time")
-
-role_trend = role_skills[role_skills["role_family"] == selected_role].copy()
-
-top_role_skills = (
-    role_trend.groupby("skill")["demand"]
-    .sum()
-    .sort_values(ascending=False)
-    .head(5)
-    .index
-)
-
-role_trend = role_trend[role_trend["skill"].isin(top_role_skills)].copy()
-
-# Fix time axis ordering
-role_trend["dt"] = pd.to_datetime(role_trend["dt"])
-
-fig = px.line(
-    role_trend,
-    x="dt",
-    y="demand",
-    color="skill",
-    markers=True,
-    title=f"Weekly Skill Demand Trend for {selected_role}"
-)
-
-st.plotly_chart(fig, use_container_width=True)
-
-# V1.1 section
-st.header("V1.1 Enriched Insights")
-
+# Seniority + domain
 col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("Demand by Seniority")
+    seniority_filtered = role_demand_by_seniority[
+        role_demand_by_seniority["ROLE_FAMILY"] == selected_role
+    ].sort_values("DEMAND", ascending=False)
 
-    seniority_filtered = role_seniority[
-        role_seniority["role_family"] == selected_role
-    ].copy()
-
-    seniority_filtered = seniority_filtered.sort_values("demand", ascending=False)
-
-    if seniority_filtered.empty:
-        st.info("No seniority data available for this role yet.")
-    else:
-        fig = px.bar(
-            seniority_filtered,
-            x="seniority_level",
-            y="demand",
-            title=f"Demand by Seniority for {selected_role}"
-        )
-
-        fig.update_xaxes(
-            categoryorder="array",
-            categoryarray=["intern_apprentice","junior","mid","senior","lead","manager","architect_principal"]
-        )
-
-        st.plotly_chart(fig, use_container_width=True)
+    fig = px.bar(
+        seniority_filtered,
+        x="SENIORITY_LEVEL",
+        y="DEMAND",
+        title=f"Demand by Seniority for {selected_role}"
+    )
+    fig.update_xaxes(
+        categoryorder="array",
+        categoryarray=[
+            "intern_apprentice", "junior", "mid",
+            "senior", "lead", "manager", "architect_principal"
+        ]
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
 with col2:
     st.subheader("Demand by Domain Focus")
+    domain_filtered = role_demand_by_domain_focus[
+        role_demand_by_domain_focus["ROLE_FAMILY"] == selected_role
+    ].sort_values("DEMAND", ascending=False)
 
-    domain_filtered = role_domain_focus[
-        role_domain_focus["role_family"] == selected_role
-    ].copy()
+    fig = px.bar(
+        domain_filtered,
+        x="DOMAIN_FOCUS",
+        y="DEMAND",
+        title=f"Demand by Domain Focus for {selected_role}"
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
-    domain_filtered = domain_filtered.sort_values("demand", ascending=False)
+# Skill trends
+st.subheader("Skill Trends by Month")
+top_role_skills = role_skill_demand[
+    role_skill_demand["ROLE_FAMILY"] == selected_role
+].sort_values("DEMAND", ascending=False).head(5)["SKILL"].tolist()
 
-    if domain_filtered.empty:
-        st.info("No domain focus data available for this role yet.")
-    else:
-        fig = px.bar(
-            domain_filtered,
-            x="domain_focus",
-            y="demand",
-            title=f"Demand by Domain Focus for {selected_role}"
-        )
-        st.plotly_chart(fig, use_container_width=True)
+skill_trend_filtered = skill_trends_by_month[
+    skill_trends_by_month["SKILL"].isin(top_role_skills)
+].copy()
+
+skill_trend_filtered["MONTH"] = pd.to_datetime(skill_trend_filtered["MONTH"])
+
+fig = px.line(
+    skill_trend_filtered,
+    x="MONTH",
+    y="DEMAND",
+    color="SKILL",
+    markers=True,
+    title=f"Monthly Skill Trends for {selected_role}"
+)
+st.plotly_chart(fig, use_container_width=True)
+
+# Role trends
+st.subheader("Role Trends by Month")
+role_trends_by_month["MONTH"] = pd.to_datetime(role_trends_by_month["MONTH"])
+
+fig = px.line(
+    role_trends_by_month,
+    x="MONTH",
+    y="DEMAND",
+    color="ROLE_FAMILY",
+    markers=True,
+    title="Monthly Role Trends"
+)
+st.plotly_chart(fig, use_container_width=True)

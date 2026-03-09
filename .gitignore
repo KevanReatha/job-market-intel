@@ -26,3 +26,6 @@ EOF
 logs/
 job_market_intel_dbt/logs/
 job_market_intel_dbt/target/
+
+.streamlit/secrets.toml
+dashboard/.streamlit/secrets.toml

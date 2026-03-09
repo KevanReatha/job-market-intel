@@ -3,3 +3,4 @@ pandas
 pyarrow
 plotly
 boto3
+snowflake-connector-python
