@@ -11,3 +11,26 @@ models:
       - name: demand
         tests:
           - not_null
+          
+  - name: mart_skill_demand
+    description: "Demand aggregated by skill."
+    columns:
+      - name: skill
+        tests:
+          - not_null
+      - name: demand
+        tests:
+          - not_null
+
+  - name: mart_role_skill_demand
+    description: "Demand aggregated by role family and skill."
+    columns:
+      - name: role_family
+        tests:
+          - not_null
+      - name: skill
+        tests:
+          - not_null
+      - name: demand
+        tests:
+          - not_null
