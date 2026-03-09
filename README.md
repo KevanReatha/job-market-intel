@@ -1,22 +1,26 @@
 # AI Job Market Intelligence
 
-AI Job Market Intelligence is a data pipeline and analytics dashboard that tracks demand for technology roles and skills using public job postings from the France Travail API.
+AI Job Market Intelligence is an end-to-end data pipeline and analytics platform that tracks **technology job market demand** using public job postings from the **France Travail API**.
 
-The project ingests job offers weekly, transforms them into structured analytics datasets, and surfaces insights through a live dashboard.
+The project collects job offers weekly, transforms them into structured datasets, and surfaces insights through an interactive dashboard.
+
+It demonstrates how a modern **analytics engineering stack** can transform raw job postings into meaningful labor-market intelligence.
 
 ---
 
-## Dashboard Preview
+# Dashboard Preview
 
 ![Dashboard](docs/images/dashboard_preview_v1_1.png)
+
 ![Dashboard](docs/images/dashboard_preview_v1_2.png)
+
 ![Dashboard](docs/images/dashboard_preview_v1_3.png)
 
 ---
 
 # Project Goal
 
-The objective of this project is to understand **technology job market demand** by answering questions such as:
+The goal of this project is to understand **technology job market demand** by answering questions such as:
 
 - Which roles are most in demand?
 - Which technical skills are growing?
@@ -25,17 +29,67 @@ The objective of this project is to understand **technology job market demand** 
 - What seniority levels are most demanded?
 - Which technical domains are associated with each role?
 
-This project also demonstrates an **end-to-end data engineering pipeline**.
+Beyond analytics, the project also demonstrates a **realistic analytics engineering architecture**.
 
 ---
 
-# Architecture
+# Key Features
 
-Pipeline overview:
+- End-to-end data pipeline from API ingestion to analytics dashboard
+- Automated weekly ingestion pipeline
+- Raw data storage in AWS S3
+- Snowflake data warehouse
+- dbt transformation layer (staging → marts)
+- Rule-based NLP enrichment for skills and job attributes
+- Interactive analytics dashboard using Streamlit
+- Time-series analysis of job market demand
+
+---
+
+# Architecture Overview
+France Travail API
+        │
+        ▼
+GitHub Actions
+(weekly ingestion)
+        │
+        ▼
+AWS S3
+Raw JSON storage
+        │
+        ▼
+Python Transformations
+        │
+        ▼
+Snowflake Warehouse
+STAGING.STG_OFFRES
+        │
+        ▼
+dbt
+Staging + Marts Layer
+        │
+        ▼
+Streamlit
+Analytics Dashboard
+
+
+---
+
+# Project Evolution
+
+The project was intentionally built in **iterations**, each introducing new capabilities.
+
+---
+
+# V1 — MVP Data Pipeline
+
+The first version focused on building a **complete end-to-end data pipeline**.
+
+### Architecture
 
 France Travail API  
 ↓  
-GitHub Actions (weekly ingestion)  
+GitHub Actions ingestion  
 ↓  
 S3 raw JSONL storage  
 ↓  
@@ -45,164 +99,234 @@ Analytics parquet datasets
 ↓  
 Streamlit dashboard
 
+### Capabilities
+
+- Weekly ingestion pipeline
+- Raw data storage in S3
+- Job description cleaning
+- Skill extraction
+- Role classification
+- Aggregated analytics datasets
+- Streamlit dashboard
+- Automated GitHub Actions pipeline
+
+### Generated datasets
+
+- `skill_demand`
+- `role_demand`
+- `role_skill_demand`
+
 ---
 
-# Tech Stack
+# V1.1 — Enriched Insights
+
+Version 1.1 introduced **rule-based NLP enrichment** to extract deeper insights from job descriptions.
+
+### New inferred attributes
+
+#### Seniority Level
+
+- intern_apprentice  
+- junior  
+- mid  
+- senior  
+- lead  
+- manager  
+- architect_principal  
+
+#### Domain Focus
+
+- data_platform  
+- bi_reporting  
+- ml_ai  
+- genai_llm  
+- cloud_devops  
+- data_governance_quality  
+- embedded_iot  
+
+### New analytics datasets
+
+- `role_demand_by_seniority`
+- `role_demand_by_domain_focus`
+
+These enrichments allow deeper analysis of job market demand by **experience level and technical specialization**.
+
+---
+
+# V2 — Modern Analytics Platform
+
+Version 2 transforms the project into a **modern analytics engineering platform** using a warehouse and transformation framework.
+
+### V2 Architecture
+
+France Travail API  
+↓  
+GitHub Actions ingestion  
+↓  
+AWS S3 raw storage  
+↓  
+Python staging transformations  
+↓  
+Snowflake `STAGING.STG_OFFRES`  
+↓  
+dbt staging model  
+`STG_OFFRES_VIEW`  
+↓  
+dbt analytics marts  
+↓  
+Streamlit dashboard connected to Snowflake
+
+---
+
+# Technology Stack
 
 ### Data Ingestion
+
 - Python
 - France Travail API
-
-### Storage
-- AWS S3
-
-### Data Processing
-- pandas
-- pyarrow
-
-### Orchestration
 - GitHub Actions
 
-### Visualization
+### Storage
+
+- AWS S3
+
+### Data Warehouse
+
+- Snowflake
+
+### Transformation Layer
+
+- dbt
+
+### Analytics / Visualization
+
 - Streamlit
 - Plotly
 
 ---
 
-# Data Pipeline
+# Data Modeling
 
-The weekly pipeline performs the following steps:
-
-1. Fetch job offers from France Travail API  
-2. Store raw data in JSONL format in S3  
-3. Clean and normalize job descriptions  
-4. Extract skills from job descriptions  
-5. Classify job roles  
-6. Enrich offers with inferred attributes
-7. Build analytics datasets  
-8. Serve insights in a Streamlit dashboard
+The analytics layer follows a **layered modeling architecture**.
 
 ---
 
-# Data Enrichment (V1.1)
+## Staging Layer
 
-Version 1.1 introduces rule-based NLP enrichment to extract additional insights from job descriptions.
+Technical normalization layer.
 
-New inferred attributes:
+Model:
+stg_offres_view
 
-### Seniority Level
+Responsibilities:
 
-- intern_apprentice
-- junior
-- mid
-- senior
-- lead
-- manager
-- architect_principal
-
-### Domain Focus
-
-- data_platform
-- bi_reporting
-- ml_ai
-- genai_llm
-- cloud_devops
-- data_governance_quality
-- embedded_iot
-
-These enrichments allow deeper analysis of the job market beyond simple role classification.
+- column normalization
+- type casting
+- base transformations
 
 ---
 
-# Analytics Datasets
+## Analytics Marts
 
-The project now generates **five analytics datasets**.
+Business-oriented datasets used by the dashboard.
 
----
+### Core marts
 
-## skill_demand
+- `mart_role_demand`
+- `mart_skill_demand`
+- `mart_role_skill_demand`
 
-Aggregated demand for each technical skill.
+### Enriched marts
 
-Columns:
+- `mart_role_demand_by_seniority`
+- `mart_role_demand_by_domain_focus`
+- `mart_skill_demand_by_role`
 
-- `skill`
-- `demand`
-- `dt`
+### Trend analysis marts
 
----
+- `mart_skill_trends_by_month`
+- `mart_role_trends_by_month`
 
-## role_demand
-
-Demand aggregated by role family.
-
-Columns:
-
-- `role_family`
-- `demand`
-- `dt`
-
----
-
-## role_skill_demand
-
-Mapping between roles and their most demanded skills.
-
-Columns:
-
-- `role_family`
-- `skill`
-- `demand`
-- `dt`
-
----
-
-## role_demand_by_seniority (V1.1)
-
-Demand distribution by role and seniority level.
-
-Columns:
-
-- `role_family`
-- `seniority_level`
-- `demand`
-- `dt`
-
----
-
-## role_demand_by_domain_focus (V1.1)
-
-Demand distribution by role and technical domain.
-
-Columns:
-
-- `role_family`
-- `domain_focus`
-- `demand`
-- `dt`
+These marts power the Streamlit analytics dashboard.
 
 ---
 
 # Example Insights
 
-Initial results show:
+Initial analysis reveals several patterns:
 
 - Software engineering roles dominate overall demand
-- Data analyst roles are strongly associated with BI and reporting tools
+- Data analyst roles correlate strongly with BI tools
 - Data engineering roles correlate with SQL, Python, Spark and cloud technologies
-- AI engineering roles are strongly linked to GenAI and ML topics
+- AI engineering roles correlate with GenAI and ML topics
 - Entry-level demand is highest for analyst-type roles
+
+---
+
+# Repository Structure
+job-market-intel
+│
+├── dashboard
+│   └── app.py
+│
+├── scripts
+│   └── test_snowflake_connection.py
+│
+├── transformations
+│   └── load_stage_to_snowflake.py
+│
+├── job_market_intel_dbt
+│   ├── dbt_project.yml
+│   ├── macros
+│   │   └── generate_schema_name.sql
+│   │
+│   └── models
+│       ├── staging
+│       │   ├── stg_offres_view.sql
+│       │   └── staging.yml
+│       │
+│       └── marts
+│           ├── mart_role_demand.sql
+│           ├── mart_skill_demand.sql
+│           ├── mart_role_skill_demand.sql
+│           ├── mart_role_demand_by_seniority.sql
+│           ├── mart_role_demand_by_domain_focus.sql
+│           ├── mart_skill_demand_by_role.sql
+│           ├── mart_skill_trends_by_month.sql
+│           ├── mart_role_trends_by_month.sql
+│           └── marts.yml
+
+
+---
+
+# Running the Project
+
+### Install dependencies
+pip install -r requirements.txt
+
+### Run ingestion pipeline
+python scripts/run_weekly_pipeline.py
+
+### Load data to Snowflake
+python transformations/load_stage_to_snowflake.py
+
+### Run dbt models
+dbt run
+dbt test
+
+### Launch dashboard
+streamlit run dashboard/app.py
 
 ---
 
 # Limitations
 
-Current version has several limitations:
+The current system has several limitations:
 
 - Role classification is rule-based
 - Skill extraction relies on keyword matching
-- Industry inference is experimental
-- Some offers fall into the "other" category
+- Industry inference remains experimental
+- Some job offers fall into the "other" category
 - Historical data coverage is still limited
 - Dashboard UX is intentionally simple
 
@@ -210,48 +334,36 @@ Current version has several limitations:
 
 # Roadmap
 
-## V1 — MVP (Completed)
+## V3 — Advanced Analytics
 
-- Weekly ingestion pipeline
-- Raw data storage in S3
-- Transformation to parquet
-- Skill extraction
-- Role classification
-- Streamlit dashboard
-- Automated GitHub Actions pipeline
-
----
-
-## V1.1 — Enriched Insights (Completed)
-
-- Seniority level inference
-- Domain focus inference
-- New analytics datasets
-- Extended dashboard insights
-
----
-
-## V2 — Advanced Analytics
-
-Planned improvements:
+Potential improvements:
 
 - Skill demand growth analysis
-- Industry demand insights
-- Job market trend detection
-- Improved dashboard UX
-
----
-
-## V3 — Data Platform
-
-Future improvements:
-
-- Snowflake data warehouse
-- dbt transformation models
-- Semantic data layer
+- Time-series forecasting
+- Industry segmentation
+- Geographic job market analysis
 
 ---
 
 ## V4 — AI Job Market Copilot
 
-Long-term vision
+Long-term vision:
+
+- LLM-powered job market assistant
+- Natural language analytics queries
+- Automated labor-market insights
+- AI-generated reports
+
+---
+
+# Why This Project Matters
+
+This project demonstrates how to build a **modern analytics engineering pipeline**:
+
+- API ingestion
+- data lake storage
+- warehouse analytics
+- dbt transformation layers
+- dashboard consumption
+
+It illustrates how data teams transform **unstructured real-world data into decision-ready analytics datasets**.
