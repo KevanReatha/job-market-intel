@@ -73,3 +73,16 @@ models:
       - name: demand
         tests:
           - not_null
+
+  - name: mart_skill_trends_by_month
+    description: "Monthly demand trend for each skill."
+    columns:
+      - name: month
+        tests:
+          - not_null
+      - name: skill
+        tests:
+          - not_null
+      - name: demand
+        tests:
+          - not_null
