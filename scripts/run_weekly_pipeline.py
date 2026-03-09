@@ -46,6 +46,14 @@ def main():
             "build_role_demand",
             [python_executable, "transformations/build_role_demand.py"],
         ),
+                (
+            "build_role_demand_by_seniority",
+            [python_executable, "transformations/build_role_demand_by_seniority.py"],
+        ),
+        (
+            "build_role_demand_by_domain_focus",
+            [python_executable, "transformations/build_role_demand_by_domain_focus.py"],
+        ),
         (
             "build_role_skill_demand",
             [python_executable, "transformations/build_role_skill_demand.py"],
