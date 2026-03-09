@@ -107,7 +107,7 @@ def infer_seniority(title: str | None, description: str | None) -> str:
     # Priority 2: description (restricted)
     desc_result = infer_category(description, RULES["seniority_level"])
 
-    if desc_result in ["junior", "intern_apprentice", "senior"]:
+    if desc_result in ["junior", "intern_apprentice", "mid", "senior"]:
         return desc_result
 
     return "unknown"
