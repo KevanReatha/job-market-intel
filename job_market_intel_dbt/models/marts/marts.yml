@@ -47,3 +47,16 @@ models:
       - name: demand
         tests:
           - not_null
+
+  - name: mart_role_demand_by_domain_focus
+    description: "Demand aggregated by role family and domain focus."
+    columns:
+      - name: role_family
+        tests:
+          - not_null
+      - name: domain_focus
+        tests:
+          - not_null
+      - name: demand
+        tests:
+          - not_null
