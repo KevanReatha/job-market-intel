@@ -11,7 +11,7 @@ models:
       - name: demand
         tests:
           - not_null
-          
+
   - name: mart_skill_demand
     description: "Demand aggregated by skill."
     columns:
@@ -29,6 +29,19 @@ models:
         tests:
           - not_null
       - name: skill
+        tests:
+          - not_null
+      - name: demand
+        tests:
+          - not_null
+
+  - name: mart_role_demand_by_seniority
+    description: "Demand aggregated by role family and seniority level."
+    columns:
+      - name: role_family
+        tests:
+          - not_null
+      - name: seniority_level
         tests:
           - not_null
       - name: demand
